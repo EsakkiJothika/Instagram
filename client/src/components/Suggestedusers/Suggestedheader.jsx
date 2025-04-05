@@ -1,34 +1,64 @@
-import { Avatar, Box, Flex, Link } from '@chakra-ui/react'
+import { Avatar, Box, Button, Flex, Skeleton, SkeletonCircle } from '@chakra-ui/react'
 import React from 'react'
-import { Link as RouterLink } from 'react-router-dom'
-import a from '../../assets/images/profilepic.png'
+import useLogout from '../../hooks/useLogout'
+import useAuthstore from '../../store/authstore'
+import { Link } from 'react-router-dom'
 
 const Suggestedheader = () => {
+  const { handleLogout, isloggingOut } = useLogout();
+  const authUser = useAuthstore((state) => state.user);
+
+  // Show Skeleton (Loading Placeholder) If User Data Is Not Ready
+  if (!authUser) {
+    return (
+      <Flex justifyContent={'space-between'} alignItems={'center'} w={'full'} gap={2}>
+        {/* Left Section (Loading Placeholder) */}
+        <Flex gap={2} alignItems={'center'} flex={1} maxW="250px">
+          <SkeletonCircle size="10" />
+          <Skeleton height="20px" width="120px" />
+        </Flex>
+
+        {/* Right Section (Loading Placeholder) */}
+        <Skeleton height="20px" width="50px" />
+      </Flex>
+    );
+  }
+
   return (
     <Flex justifyContent={'space-between'} alignItems={'center'} w={'full'} gap={2}>
       {/* Left Section */}
       <Flex gap={2} alignItems={'center'} flex={1} maxW="250px">
-        <Avatar size={'lg'} src={a} />
+        <Link to={`${authUser.username}`}>
+          <Avatar 
+            size={'lg'} 
+            src={authUser.profilepicURL} 
+          />
+        </Link>
+        <Link to={`${authUser.username}`}>
         <Box fontWeight={'bold'} fontSize={15} whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-          asaprogrammer
+          {authUser.username}
         </Box>
+        </Link>
+          
       </Flex>
 
       {/* Right Section (Log Out Link) */}
-      <Link 
-        as={RouterLink} 
-        to={"/login"}
+      <Button 
+        size={'xs'}
+        bg={'transparent'}
+        _hover={{ bg: 'transparent' }}
         fontWeight={'medium'}
         fontSize={14}
         color={'blue.400'}
         cursor={'pointer'}
-        style={{ textDecoration: "none" }}
+        onClick={handleLogout}
+        isLoading={isloggingOut}
         whiteSpace="nowrap"
       >
         Log Out
-      </Link>
+      </Button>
     </Flex>
   )
 }
 
-export default Suggestedheader
+export default Suggestedheader;

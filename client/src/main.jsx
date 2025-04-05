@@ -22,9 +22,11 @@ const config = {
 const theme = extendTheme({ config, styles });
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
-  </StrictMode>
+// Inside render:
+<StrictMode>
+  <ChakraProvider theme={theme}>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <App />
+  </ChakraProvider>
+</StrictMode>
 );

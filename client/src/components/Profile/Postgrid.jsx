@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Divider,
   Flex,
   GridItem,
@@ -15,16 +16,70 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { AiFillHeart } from "react-icons/ai";
 import { FaComment } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import p from "../../assets/images/profilepic.png";
 import PostFooter from "../Feedpost/PostFooter";
 import Comment from "./Comment";
+import useUserProfileStore from "../../store/userprofilestore";
+import useAuthstore from "../../store/authstore";
+import useShowToast from "../../hooks/useShowToast";
+import { arrayRemove, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { firestore } from "../../Firebase/firebase";
+import usePostStore from "../../store/poststore";
+import axios from "axios";
+import Caption from "./Caption";
 
-const Postgrid = ({ img }) => {
+const Postgrid = ({ post }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const userProfile = useUserProfileStore((state) => state.userProfile);
+  const authUser = useAuthstore((state) => state.user);
+  const deletePost = usePostStore((state) => state.deleteposts);
+  const decrementPostsCount = useUserProfileStore((state) => state.deletePost);
+
+  const showToast = useShowToast();
+  const [isdeleted, setIsdeleted] = useState(false);
+
+  const handleDeletePost = async () => {
+    if (!window.confirm("Are you sure want to delete this post ?")) {
+      return;
+    }
+
+    if (isdeleted) {
+      return;
+    }
+
+    try {
+      // imageRef = ref(Storage, `post/${post.id}`)
+      // await deleteobject(imageRef)
+
+      // Delete image from Cloudinary
+      //  const cloudinaryPublicId = post.imageURL.split("/").pop().split(".")[0]; // Extract public ID
+      //  await axios.post("https://api.cloudinary.com/v1_1/dazba41e6/destroy", {
+      //    public_id: cloudinaryPublicId,
+      //  });
+
+      // Delete post from Firestore
+
+      const userRef = doc(firestore, "users", authUser.uid);
+      await deleteDoc(doc(firestore, "posts", post.id));
+
+      await updateDoc(userRef, {
+        posts: arrayRemove(post.id),
+      });
+
+      deletePost(post.id);
+      decrementPostsCount(post.id);
+
+      showToast("Success", "Post deleted Successfully", "success");
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    } finally {
+      setIsdeleted(false);
+    }
+  };
 
   return (
     <>
@@ -55,19 +110,19 @@ const Postgrid = ({ img }) => {
             <Flex>
               <AiFillHeart size={20} />
               <Text fontWeight={"bold"} ml={2}>
-                7
+                {post.likes.length}
               </Text>
             </Flex>
             <Flex>
               <FaComment size={20} />
               <Text fontWeight={"bold"} ml={2}>
-                7
+                {post.comment.length}
               </Text>
             </Flex>
           </Flex>
         </Flex>
 
-        <Image src={img} w={"full"} h={"full"} objectFit={"cover"} />
+        <Image src={post.imageURL} w={"full"} h={"full"} objectFit={"cover"} />
       </GridItem>
 
       <Modal
@@ -93,23 +148,27 @@ const Postgrid = ({ img }) => {
               mx={"auto"}
               h={"100%"}
               flex={1}
+              // maxH={'90vh'}
+              // minH={'50vh'}
             >
               {/* Image Section */}
-              <Box
+              <Flex
                 borderRadius={4}
                 overflow={"hidden"}
                 border={"1px solid"}
                 borderColor={"whiteAlpha.300"}
                 flex={1.5}
+                justifyContent={"center"}
+                alignItems={"center"}
               >
                 <Image
-                  src={img}
+                  src={post.imageURL}
                   alt="profile post"
                   w={"100%"}
                   h={"100%"}
                   objectFit={"cover"}
                 />
-              </Box>
+              </Flex>
 
               {/* Comments Section */}
               <Flex
@@ -117,22 +176,29 @@ const Postgrid = ({ img }) => {
                 flex={1}
                 display={{ base: "none", md: "flex" }}
                 px={10}
-                maxH="100%"
+                minH="0"
               >
                 <Flex alignItems={"center"} justifyContent={"space-between"}>
                   <Flex alignItems={"center"} gap={4}>
-                    <Avatar src={p} size={"sm"} />
+                    <Avatar src={userProfile.profilepicURL} size={"sm"} />
                     <Text fontWeight={"bold"} fontSize={12}>
-                      asaprogrammer
+                      {userProfile.username}
                     </Text>
                   </Flex>
-                  <Box
-                    _hover={{ bg: "whiteAlpha.300", color: "red.600" }}
-                    borderRadius={4}
-                    p={1}
-                  >
-                    <MdDelete size={20} cursor={"pointer"} />
-                  </Box>
+
+                  {authUser?.uid === userProfile.uid && (
+                    <Button
+                      size={"sm"}
+                      bg={"transparent"}
+                      _hover={{ bg: "whiteAlpha.300", color: "red.600" }}
+                      borderRadius={4}
+                      p={1}
+                      isLoading={isdeleted}
+                      onClick={handleDeletePost}
+                    >
+                      <MdDelete size={20} cursor={"pointer"} />
+                    </Button>
+                  )}
                 </Flex>
 
                 <Divider bg={"gray.500"} my={5} />
@@ -140,83 +206,30 @@ const Postgrid = ({ img }) => {
                 {/* Scrollable Comments */}
                 <VStack
                   alignItems={"start"}
-                  maxH={"350px"}
                   w={"full"}
-                  flex={1} // Takes available space
-                  overflowY={"auto"}
-                 
+                  flex={1}
+                  overflowY={"auto"} // ✅ Enables scrolling without affecting layout
                 >
-                  <Comment
-                    createdAt="1 day ago"
-                    username="asaprogrammer"
-                    profilePic={p}
-                    text="Life is beautiful when you care for nobody."
-                  />
-                  <Comment
-                    createdAt="12h ago"
-                    username="abrahmov"
-                    profilePic="https://bit.ly/dan-abramov"
-                    text="Nice pic"
-                  />
-                  <Comment
-                    createdAt="3h ago"
-                    username="kentdodds"
-                    profilePic="https://bit.ly/kent-c-dodds"
-                    text="Good clone dude!"
-                  />
+                  {/* CAPTION SECTION */}
+                  {post.caption && (
+                    <Caption post={post} />
+                  )}
 
-                  <Comment
-                    createdAt="3h ago"
-                    username="kentdodds"
-                    profilePic="https://bit.ly/kent-c-dodds"
-                    text="Good clone dude!"
-                  />
-
-                  <Comment
-                    createdAt="3h ago"
-                    username="kentdodds"
-                    profilePic="https://bit.ly/kent-c-dodds"
-                    text="Good clone dude!"
-                  />
-                  <Comment
-                    createdAt="12h ago"
-                    username="abrahmov"
-                    profilePic="https://bit.ly/dan-abramov"
-                    text="Nice pic"
-                  />
-                  <Comment
-                    createdAt="12h ago"
-                    username="abrahmov"
-                    profilePic="https://bit.ly/dan-abramov"
-                    text="Nice pic"
-                  />
-                  <Comment
-                    createdAt="12h ago"
-                    username="abrahmov"
-                    profilePic="https://bit.ly/dan-abramov"
-                    text="Nice pic"
-                  />
-
-                  <Comment
-                    createdAt="3h ago"
-                    username="kentdodds"
-                    profilePic="https://bit.ly/kent-c-dodds"
-                    text="Good clone dude!"
-                  />
-
-                  <Comment
-                    createdAt="3h ago"
-                    username="kentdodds"
-                    profilePic="https://bit.ly/kent-c-dodds"
-                    text="Good clone dude!"
-                  />
+                  {/* COMMENT SECTION */}
+                  {post.comment?.map(
+                    (
+                      comment // Fix: No extra space in `?.`
+                    ) => (
+                      <Comment key={comment.id} comment={comment} />
+                    )
+                  )}
                 </VStack>
 
                 <Divider bg={"gray.300"} my={4} />
 
                 {/* Footer Sticks to Bottom */}
                 <Box mt="auto" w="full">
-                  <PostFooter isprofilepage={true} mbValue={0} />
+                  <PostFooter isprofilepage={true} post={post} mbValue={0} />
                 </Box>
               </Flex>
             </Flex>

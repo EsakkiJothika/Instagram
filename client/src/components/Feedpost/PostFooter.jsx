@@ -6,38 +6,48 @@ import {
   InputGroup,
   InputRightElement,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   CommentLogo,
   NotificationsLogo,
   UnlikeLogo,
 } from "../../assets/icons/Constants";
+import usePostComment from "../../hooks/usePostComment";
+import useAuthstore from "../../store/authstore";
+import useLikePost from "../../hooks/useLikePost";
+import { timeAgo } from "../../utils/timeAgo";
+import Commentsmodal from "../Modals/Commentsmodal";
 
-const PostFooter = ({ username, isprofilepage, mbValue }) => {
-  const [liked, setLiked] = useState(false);
-  const [likes, setLikes] = useState(1000);
+const PostFooter = ({ post, username, isprofilepage, creatorprofile, mbValue }) => {
 
-  const handlelikes = () => {
-    setLiked(!liked);
+  const [comment,setComment] = useState("");
+  const {iscommenting, handlePostComment} = usePostComment();
+  const authUser = useAuthstore((state) => state.user);
+  const commentRef = useRef(null);
+  const {handleLikePost, isliked, likes} = useLikePost(post);
+  const {isOpen, onOpen, onClose} = useDisclosure();
 
-    if (liked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
-    }
-  };
+  const handleSubmitComment = async () => {
+
+    await handlePostComment(post.id,comment);
+    setComment("")
+
+  } 
+
+
 
   return (
     <Flex flexDirection="column" flex={1} >
       {/* Ensures flex behavior */}
       <Box mb={mbValue} marginTop={"auto"}>
         <Flex alignItems={"center"} gap={4} w={"full"} mt={4} mb={2} pt={0}>
-          <Box onClick={handlelikes} cursor={"pointer"} fontSize={18}>
-            {!liked ? <NotificationsLogo /> : <UnlikeLogo />}
+          <Box onClick={handleLikePost} cursor={"pointer"} fontSize={18}>
+            {!isliked ? <NotificationsLogo /> : <UnlikeLogo />}
           </Box>
-          <Box cursor={"pointer"} fontSize={18}>
-            <CommentLogo />
+          <Box cursor={"pointer"} fontSize={18} onClick={() => {commentRef.current.focus()}} >
+            <CommentLogo  />
           </Box>
         </Flex>
 
@@ -45,21 +55,36 @@ const PostFooter = ({ username, isprofilepage, mbValue }) => {
           {likes} likes
         </Text>
 
+        {isprofilepage && (
+				<Text fontSize='12' color={"gray"}>
+					Posted {timeAgo(post.createdAt)}
+				</Text>
+			)}
+
         {!isprofilepage && (
           <>
             <Text fontWeight={700} fontSize={"sm"}>
-              {username}{" "}
+              {creatorprofile?.username}{" "}
               <Text as={"span"} fontWeight={400}>
-                Feeling good
+                {post?.caption}
               </Text>
             </Text>
-            <Text color={"gray"} fontSize={"sm"}>
-              View all 1,000 comments
-            </Text>
+           {post?.comment.length > 0 && (
+             <Text color={"gray"} fontSize={"sm"} cursor={"pointer"} onClick={onOpen} >
+             View all {post?.comment.length} comments
+           </Text>
+           )}
+
+           {/* COMMENTS MODAL ONLY ON HOME PAGE */}
+
+           {isOpen ? ( <Commentsmodal isOpen={isOpen} onClose={onClose} post={post} />) : null}
+
           </>
         )}
 
-        <Flex
+
+        {authUser && (
+          <Flex
           alignItems={"center"}
           gap={2}
           justifyContent={"space-between"}
@@ -70,18 +95,25 @@ const PostFooter = ({ username, isprofilepage, mbValue }) => {
               variant={"flushed"}
               fontSize={14}
               placeholder="Add a comment..."
+              onChange={(e) => {setComment(e.target.value)}}
+              value={comment}
+              ref={commentRef}
             />
             <InputRightElement>
               <Button
                 bg={"transparent"}
                 color={"blue.500"}
                 _hover={{ color: "gray" }}
+                onClick={handleSubmitComment}
+                isLoading={iscommenting}
               >
                 Post
               </Button>
             </InputRightElement>
           </InputGroup>
         </Flex>
+        )}
+        
       </Box>
     </Flex>
   );
