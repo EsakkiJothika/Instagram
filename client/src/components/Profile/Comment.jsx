@@ -14,7 +14,7 @@ const Comment = ({comment}) => {
 
 
   return (
-    <Flex gap={4} >
+    <Flex gap={4} color={'white'} >
       <Link to={`/${userProfile.username}`}>
         <Avatar src={userProfile.profilepicURL}  size={'sm'} />
       </Link>

@@ -1,18 +1,18 @@
-import { useState } from "react"
+import { useState } from "react";
 import useAuthstore from "../store/authstore";
 import useShowToast from "./useShowToast";
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../Firebase/firebase";
+import usePostStore from "../store/poststore"; // ADD THIS
 
-const useLikePost = (post) => {         // ❌ No destructuring here
+const useLikePost = (post) => {
     const [isupdating, setIsupdating] = useState(false);
     const authUser = useAuthstore((state) => state.user);
+    const showToast = useShowToast();
+    const addlike = usePostStore((state) => state.addlike); // ADD THIS
 
-    // ✅ Handle undefined post safely
     const [likes, setLikes] = useState(post?.likes?.length || 0);
     const [isliked, setIsliked] = useState(post?.likes?.includes(authUser?.uid) || false);
-
-    const showToast = useShowToast();
 
     const handleLikePost = async () => {
         if (isupdating || !authUser) return;
@@ -26,6 +26,7 @@ const useLikePost = (post) => {         // ❌ No destructuring here
 
             setIsliked(!isliked);
             setLikes((prev) => (isliked ? prev - 1 : prev + 1));
+            addlike(post.id, authUser.uid); // 🔥 IMMEDIATE LOCAL UPDATE
         } catch (error) {
             showToast("Error", error.message, "error");
         } finally {
@@ -37,5 +38,3 @@ const useLikePost = (post) => {         // ❌ No destructuring here
 };
 
 export default useLikePost;
-
-

@@ -157,14 +157,18 @@ function useCreatePost(){
 
       newPost.imageURL = imageUrl;
 
-      if (userProfile.uid === authUser.uid) {
-        createPost({...newPost,id: postDocRef.id});
-      }
       
 
-      if (pathname !== '/' && userProfile.uid === authUser.uid) {
-        addpost({...newPost,id: postDocRef.id});
-      }
+      if (pathname === "/" ) { 
+
+        createPost({ ...newPost, id: postDocRef.id });
+
+     } else if (userProfile.uid === authUser.uid) {
+
+        addpost({ ...newPost, id: postDocRef.id });
+
+     }
+     
       
 
 			showToast("Success", "Post created Successfully", "success")

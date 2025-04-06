@@ -20,11 +20,13 @@ const Profileheader = () => {
 
   return (
     <Flex gap={{base:4,md:10}} py={7} direction={{base:'column',sm:'row'}}>
-      <AvatarGroup size={{base:'xl',md:'2xl'}} justifyContent={'center'} alignSelf={'flex-start'} mx={'auto'}>
+      <Avatar 
+  size={{ base: 'xl', md: '2xl' }}
+  src={userProfile.profilepicURL}
+  alt="profile logo"
+  mx="auto"
+/>
 
-        <Avatar  src={userProfile.profilepicURL} alt='profile logo' />
-
-      </AvatarGroup>
       <VStack alignItems={'start'} gap={2} mx={'auto'} flex={1}>
         <Flex 
         direction={{base:'column',md:'row'}} 

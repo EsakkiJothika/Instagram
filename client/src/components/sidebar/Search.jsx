@@ -3,17 +3,18 @@ import { Box, Button, Flex, FormControl, FormLabel, Input, Modal, ModalBody, Mod
 import { SearchLogo } from "../../assets/icons/Constants";
 import useSearchUser from "../../hooks/useSearchUser";
 import Users from "../Suggestedusers/Users";
+import useAuthstore from "../../store/authstore";
 
 const Search = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isloading, getUserProfile, user, setUser } = useSearchUser();
   const searchRef = useRef(null);
+  const authUser = useAuthstore((state) => state.user);
 
   const handleSearchUser = (e) => {
     e.preventDefault();
     getUserProfile(searchRef.current.value);
 
-    console.log(user);
 
   }
 
@@ -52,7 +53,7 @@ const Search = () => {
             <form onSubmit={handleSearchUser}>
               <FormControl>
                 <FormLabel>Username</FormLabel>
-                <Input placeholder="asaprogrammer" ref={searchRef} />
+                <Input placeholder={authUser?.username} ref={searchRef} />
               </FormControl>
 
               <Flex w={"full"} justifyContent={"flex-end"}>

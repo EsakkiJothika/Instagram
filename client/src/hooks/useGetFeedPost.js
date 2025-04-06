@@ -24,7 +24,8 @@ const useGetFeedPost = () => {
           setIsloading(false)
           setposts([])
 
-          showToast("Information", "Once you started following user you will get post feed", "info")
+          showToast("Information", "Once you started following user you will get post feed", "info");
+          return; // Very important: stop the function here!
         }
 
         const q = query(collection(firestore,"posts"),where("createdBy","in",authUser.following))

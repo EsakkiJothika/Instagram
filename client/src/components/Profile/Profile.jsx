@@ -4,12 +4,13 @@ import React from 'react'
 import Profileheader from './Profileheader'
 import Profiletabs from './Profiletabs'
 import Profilepost from './Profilepost'
-import useGetUserProfilebuUsername from '../../hooks/useGetUserProfilebuUsername'
+// import useGetUserProfilebuUsername from '../../hooks/useGetUserProfilebuUsername'
+import useGetUserProfileByUsername from '../../hooks/useGetUserProfilebuUsername'
 
 const Profile = () => {
 
   const {username} = useParams();
-  const { isloading,userProfile } = useGetUserProfilebuUsername(username);
+  const { isloading,userProfile } = useGetUserProfileByUsername(username);
 
   const userNotFound = !isloading && !userProfile;
 

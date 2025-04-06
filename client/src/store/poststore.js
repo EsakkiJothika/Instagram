@@ -15,6 +15,23 @@ const usePostStore = create((set) => ({
             }
             return post; // Return unchanged post
         })
+    })),
+    
+    addlike: (postID, userID) => set((state) => ({
+        posts: state.posts.map((post) => {
+            if (post.id === postID) {
+                const alreadyLiked = post.likes?.includes(userID);
+                const updatedLikes = alreadyLiked
+                    ? post.likes.filter((id) => id !== userID) // remove like
+                    : [...(post.likes || []), userID];         // add like
+    
+                return {
+                    ...post,
+                    likes: updatedLikes,
+                };
+            }
+            return post;
+        })
     }))
     
     

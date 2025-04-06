@@ -12,40 +12,36 @@ const usePostComment = () => {
    const authUser = useAuthstore((state) => state.user);
    const addComment = usePostStore((state) => state.addcomment)
 
-   const handlePostComment = async (postID,comment) =>{
-
-    if(iscommenting){
-        return
+   const handlePostComment = async (postID, comment) => {
+    if (iscommenting) {
+      return;
     }
-    if(!authUser){
-        return showToast("Error", "You have to login to comment on this post", "error")
+    if (!authUser) {
+      return showToast("Error", "You have to login to comment on this post", "error");
     }
-
-    setIscommenting(true)
-
+  
+    setIscommenting(true);
+  
     const newComment = {
-        comment : comment,
-        createdAt : Date.now(),
-        createdBy : authUser.uid,
-        postID : postID
-    }
-
+      comment: comment,
+      createdAt: Date.now(),
+      createdBy: authUser.uid,
+      postID: postID,
+    };
+  
     try {
-
-        await updateDoc(doc(firestore,"posts",postID),{
-            comment: arrayUnion(newComment)
-        })
-
-        addComment(postID,comment)
-
+      await updateDoc(doc(firestore, "posts", postID), {
+        comment: arrayUnion(newComment),
+      });
+  
+      addComment(postID, newComment); // 🛠️ Pass the full newComment, not just comment text
     } catch (error) {
-
-        showToast("Error", error.message, "error")
-        
-    } finally{
-        setIscommenting(false)
+      showToast("Error", error.message, "error");
+    } finally {
+      setIscommenting(false);
     }
-   }
+  };
+  
 
    return {iscommenting, handlePostComment}
 }

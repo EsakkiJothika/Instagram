@@ -16,7 +16,8 @@ const useUserProfileStore = create((set) => ({
             ...state.userProfile,
             posts: state.userProfile.filter((id) => id !== postID)
         }
-    }))
+    })),
+
 
     
 }))

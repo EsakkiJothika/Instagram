@@ -16,7 +16,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AiFillHeart } from "react-icons/ai";
 import { FaComment } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
@@ -41,6 +41,18 @@ const Postgrid = ({ post }) => {
 
   const showToast = useShowToast();
   const [isdeleted, setIsdeleted] = useState(false);
+
+
+    // ✨ Local comments state
+    const [comments, setComments] = useState(post.comment || []);
+    const [likes, setLikes] = useState(post.likes || []);
+    
+
+    useEffect(() => {
+      setComments(post.comment || []);
+      setLikes(post.likes || []);
+    }, [post.comment, post.likes]);
+    
 
   const handleDeletePost = async () => {
     if (!window.confirm("Are you sure want to delete this post ?")) {
@@ -107,18 +119,19 @@ const Postgrid = ({ post }) => {
           transition={"all 0.3s ease"}
         >
           <Flex alignItems={"center"} justifyContent={"center"} gap={50}>
-            <Flex>
-              <AiFillHeart size={20} />
-              <Text fontWeight={"bold"} ml={2}>
-                {post.likes.length}
-              </Text>
-            </Flex>
-            <Flex>
-              <FaComment size={20} />
-              <Text fontWeight={"bold"} ml={2}>
-                {post.comment.length}
-              </Text>
-            </Flex>
+          <Flex color="white">
+  <AiFillHeart size={20} />
+  <Text fontWeight={"bold"} ml={2}>
+    {likes.length} {/* 👈 updated from post.likes.length to likes.length */}
+  </Text>
+</Flex>
+<Flex color="white">
+  <FaComment size={20} />
+  <Text fontWeight={"bold"} ml={2}>
+    {comments.length} {/* 👈 updated from post.comment.length to comments.length */}
+  </Text>
+</Flex>
+
           </Flex>
         </Flex>
 
@@ -134,7 +147,7 @@ const Postgrid = ({ post }) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalCloseButton />
+          <ModalCloseButton color={"white"} />
           <ModalBody
             pb={{ base: 7, md: 5 }}
             pt={{ base: 10, md: 5 }}
@@ -179,7 +192,7 @@ const Postgrid = ({ post }) => {
                 minH="0"
               >
                 <Flex alignItems={"center"} justifyContent={"space-between"}>
-                  <Flex alignItems={"center"} gap={4}>
+                  <Flex alignItems={"center"} color={"white"} gap={4}>
                     <Avatar src={userProfile.profilepicURL} size={"sm"} />
                     <Text fontWeight={"bold"} fontSize={12}>
                       {userProfile.username}
@@ -190,6 +203,7 @@ const Postgrid = ({ post }) => {
                     <Button
                       size={"sm"}
                       bg={"transparent"}
+                      color={"white"}
                       _hover={{ bg: "whiteAlpha.300", color: "red.600" }}
                       borderRadius={4}
                       p={1}
@@ -205,6 +219,7 @@ const Postgrid = ({ post }) => {
 
                 {/* Scrollable Comments */}
                 <VStack
+                color={"white"}
                   alignItems={"start"}
                   w={"full"}
                   flex={1}
@@ -212,7 +227,7 @@ const Postgrid = ({ post }) => {
                 >
                   {/* CAPTION SECTION */}
                   {post.caption && (
-                    <Caption post={post} />
+                    <Caption  post={post} />
                   )}
 
                   {/* COMMENT SECTION */}
@@ -220,7 +235,7 @@ const Postgrid = ({ post }) => {
                     (
                       comment // Fix: No extra space in `?.`
                     ) => (
-                      <Comment key={comment.id} comment={comment} />
+                      <Comment key={comment.id} comment={comment} />        
                     )
                   )}
                 </VStack>
@@ -228,8 +243,18 @@ const Postgrid = ({ post }) => {
                 <Divider bg={"gray.300"} my={4} />
 
                 {/* Footer Sticks to Bottom */}
-                <Box mt="auto" w="full">
-                  <PostFooter isprofilepage={true} post={post} mbValue={0} />
+                <Box mt="auto" w="full" color={"white"}>
+                   {/* Footer */}
+                   <PostFooter
+  isprofilepage={true}
+  post={post}
+  mbValue={0}
+  comments={comments} 
+  setComments={setComments}
+  likes={likes}
+  setLikes={setLikes}
+/>
+
                 </Box>
               </Flex>
             </Flex>
