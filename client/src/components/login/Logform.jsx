@@ -32,7 +32,7 @@ const Logform = () => {
 
         {/* -------------- Google signin ------------ */}
 
-                <Googlelog  prefix = {isLogin ? "Log in" : "Sign up"} />
+                <Googlelog  mode={isLogin ? "login" : "signup"} />
 
             </VStack>
         </Box>

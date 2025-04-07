@@ -199,7 +199,7 @@ const Postgrid = ({ post }) => {
                     </Text>
                   </Flex>
 
-                  {authUser?.uid === userProfile.uid && (
+                  {authUser?.uid === userProfile?.uid && (
                     <Button
                       size={"sm"}
                       bg={"transparent"}

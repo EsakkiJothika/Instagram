@@ -16,43 +16,43 @@ const useGetFeedPost = () => {
     const {setuserProfile} = useUserProfileStore();
 
     useEffect(() => {
-
+      if (!authUser) return; // Wait for authUser to be available
+    
       const getFeedPosts = async () => {
-
-        setIsloading(true)
-        if (authUser.following.length === 0) {
-          setIsloading(false)
-          setposts([])
-
-          showToast("Information", "Once you started following user you will get post feed", "info");
-          return; // Very important: stop the function here!
+        setIsloading(true);
+    
+        if (!authUser.following || authUser.following.length === 0) {
+          setIsloading(false);
+          setposts([]);
+        
+          return; // Important to return
         }
-
-        const q = query(collection(firestore,"posts"),where("createdBy","in",authUser.following))
-
+    
+        const q = query(
+          collection(firestore, "posts"),
+          where("createdBy", "in", authUser.following)
+        );
+    
         try {
-          const querySnapshot = await getDocs(q)
+          const querySnapshot = await getDocs(q);
           const feedPosts = [];
-          
+    
           querySnapshot.forEach((doc) => {
-            feedPosts.push({id:doc.id,...doc.data()})
-          })
-
-          feedPosts.sort((a,b) => b.createdAt - a.createdAt);
+            feedPosts.push({ id: doc.id, ...doc.data() });
+          });
+    
+          feedPosts.sort((a, b) => b.createdAt - a.createdAt);
           setposts(feedPosts);
-
         } catch (error) {
-          showToast("Error",error.message,"error")
-        } finally{
-          setIsloading(false)
+          showToast("Error", error.message, "error");
+        } finally {
+          setIsloading(false);
         }
-      }
-
-      if (authUser) {
-        getFeedPosts();
-      }
-
-    }, [authUser,showToast,setposts,setuserProfile])
+      };
+    
+      getFeedPosts();
+    }, [authUser?.uid]); //  depend only on authUser.uid
+    
     
   return {isloading, posts};
 }

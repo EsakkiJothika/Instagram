@@ -7,38 +7,32 @@ import { useSignInWithGoogle } from "react-firebase-hooks/auth";
 import { auth, firestore } from '../../Firebase/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const Googlelog = ({ prefix }) => {
+const Googlelog = ({ mode }) => {
   const [signInWithGoogle, loading, error] = useSignInWithGoogle(auth);
   const showToast = useShowToast();
   const loginUser = useAuthstore((state) => state.login);
 
   const handleGoogleAuth = async () => {
     try {
-      const newUser = await signInWithGoogle(); // ✅ Correct function name
-
-      if (error) {
-        showToast("Error", error.message, "error");
-        return;
-      }
-
+      const newUser = await signInWithGoogle(); // this opens Google popup
+  
       if (!newUser) {
         showToast("Error", "Google sign-in failed", "error");
         return;
       }
-
+  
       const userRef = doc(firestore, "users", newUser.user.uid);
       const userSnap = await getDoc(userRef);
-
+  
       let userDoc;
-
+  
       if (userSnap.exists()) {
         userDoc = userSnap.data();
-        
       } else {
         userDoc = {
           uid: newUser.user.uid,
           email: newUser.user.email,
-          username: newUser.user.email.split("@")[0], // aadhini
+          username: newUser.user.email.split("@")[0],
           fullname: newUser.user.displayName || "No Name",
           bio: "",
           profilepicURL: newUser.user.photoURL || "",
@@ -47,21 +41,18 @@ const Googlelog = ({ prefix }) => {
           posts: [],
           createdAt: Date.now(),
         };
-
-        // Store new user in Firestore
+  
         await setDoc(userRef, userDoc);
       }
-
-      // Save user info in localStorage
+  
       localStorage.setItem("user-info", JSON.stringify(userDoc));
-
-      // Update auth state
       loginUser(userDoc);
-
-    } catch (error) {
-      showToast("Error", error.message, "error");
+  
+    } catch (err) {
+      showToast("Error", err.message, "error"); // use 'err' here not 'error'
     }
   };
+  
 
   return (
     <Flex
@@ -73,7 +64,7 @@ const Googlelog = ({ prefix }) => {
     >
       <Image src={g} alt="google logo" w={5} />
       <Text mx={2} color={"blue.500"}>
-        {prefix} with Google
+      {mode === "login" ? "Log in with Google" : "Sign up with Google"}
       </Text>
     </Flex>
   );

@@ -18,31 +18,37 @@ const useLogin = () => {
       showToast("Error", "Please fill out all the fields", "error");
       return;
     }
-
+  
     try {
       setLoading(true);
       setError(null);
-
+  
       const userCred = await signInWithEmailAndPassword(
         logindata.email,
         logindata.password
       );
-
-      if (userCred) {
-        const docRef = doc(firestore, "users", userCred.user.uid);
-        const docSnap = await getDoc(docRef);
-
-        const userData = docSnap.data();
-        localStorage.setItem("user-info", JSON.stringify(userData));
-        loginUser(userData);
+  
+     
+  
+      if (!userCred || !userCred.user) {
+        throw new Error("Invalid email or password");
       }
+  
+      const docRef = doc(firestore, "users", userCred.user.uid);
+      const docSnap = await getDoc(docRef);
+  
+      const userData = docSnap.data();
+      localStorage.setItem("user-info", JSON.stringify(userData));
+      loginUser(userData);
     } catch (err) {
-      setError(err);
-      showToast("Error", err.message, "error");
+      
+      setError({ message: err.message || "Login failed" });
+      showToast("Error", err.message || "Login failed", "error");
     } finally {
       setLoading(false);
     }
   };
+  
 
   return { loading, error, login };
 };

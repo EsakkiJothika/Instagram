@@ -11,14 +11,20 @@ const useUserProfileStore = create((set) => ({
         }
     })),
 
-    deletePost : (postID) => set((state) => ({
+    // deletePost : (postID) => set((state) => ({
+    //     userProfile: {
+    //         ...state.userProfile,
+    //         posts: state.userProfile.filter((id) => id !== postID)
+    //     }
+    // })),
+
+    deletePost: (postID) => set((state) => ({
         userProfile: {
-            ...state.userProfile,
-            posts: state.userProfile.filter((id) => id !== postID)
+          ...state.userProfile,
+          posts: state.userProfile.posts.filter((id) => id !== postID) // If posts are just IDs
         }
-    })),
-
-
+      })),
+      
     
 }))
 

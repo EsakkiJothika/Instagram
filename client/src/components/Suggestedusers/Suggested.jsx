@@ -21,7 +21,7 @@ const Suggested = () => {
             <Flex justifyContent={'space-between'} alignItems={'center'} w={'full'} >
 
             <Text fontSize={12} color={'gray.400'} fontWeight={'bold'}>Suggested for you</Text>
-            <Text fontSize={12}  _hover={{color:"gray.500"}} fontWeight={'bold'}>See all</Text>
+            {/* <Text fontSize={12}  _hover={{color:"gray.500"}} fontWeight={'bold'}>See all</Text> */}
 
           </Flex>
           )}
