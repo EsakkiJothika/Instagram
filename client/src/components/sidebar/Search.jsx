@@ -13,10 +13,16 @@ const Search = () => {
 
   const handleSearchUser = (e) => {
     e.preventDefault();
-    getUserProfile(searchRef.current.value);
-
-
-  }
+    const searchValue = searchRef.current.value.trim();
+  
+    if (!searchValue) {
+      setUser(null); // Clear previous search result if search input is empty
+      return;
+    }
+  
+    getUserProfile(searchValue); // Only call if there is a search value
+  };
+  
 
   
   return (
@@ -50,20 +56,21 @@ const Search = () => {
           <ModalHeader>Search user</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
-            <form onSubmit={handleSearchUser}>
-              <FormControl>
-                <FormLabel>Username</FormLabel>
-                <Input placeholder={authUser?.username} ref={searchRef} />
-              </FormControl>
+          <form onSubmit={handleSearchUser}>
+  <FormControl>
+    <FormLabel>Username</FormLabel>
+    <Input placeholder={authUser?.username} ref={searchRef} />
+  </FormControl>
 
-              <Flex w={"full"} justifyContent={"flex-end"}>
-                <Button type="submit" ml={"auto"} size={"sm"} my={4} isLoading={isloading} >
-                  Search
-                </Button>
-              </Flex>
-            </form>
+  <Flex w={"full"} justifyContent={"flex-end"}>
+    <Button type="submit" ml={"auto"} size={"sm"} my={4} isLoading={isloading}>
+      Search
+    </Button>
+  </Flex>
+</form>
 
-            {user && <Users user={user} setUser={setUser} /> }
+{user && <Users user={user} setUser={setUser} />}
+
 
           </ModalBody>
         </ModalContent>

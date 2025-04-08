@@ -20,7 +20,7 @@ const Users = ({ user, setUser }) => {
       });
     }
 
-    setIsfollowing((prev) => !prev); // ✅ Manually toggle state
+    // setIsfollowing((prev) => !prev); //  Manually toggle state
   };
 
   return (
@@ -53,7 +53,7 @@ const Users = ({ user, setUser }) => {
       </Flex>
 
       {/* Right Section (Button) */}
-      {authUser.uid !== user.uid && (
+      {authUser?.uid !== user.uid && (
         <Button
           bg={"transparent"}
           border={"1px solid gray"}
